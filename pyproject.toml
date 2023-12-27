@@ -1,0 +1,11 @@
+[project]
+name = "NetWatcher"
+version = "1.0"
+description = ""
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
