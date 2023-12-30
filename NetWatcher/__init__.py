@@ -1,17 +1,32 @@
 from flask import Flask
-import yaml
 
 app = Flask(__name__)
 
+import NetWatcher.views.ui_views
+from flask_sqlalchemy import SQLAlchemy
 
-def import_devices():
-    with open("NetWatcher/data/devices.yaml") as device_files:
-        devices = yaml.safe_load(device_files.read())
-    return devices
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATION"] = False
+db = SQLAlchemy(app)
+
+app.app_context().push()
 
 
-@app.route("/devices/")
-def devices():
+class Device(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.Text)
+    name = db.Column(db.Text, unique=True, nullable=False)
+    os = db.Column(db.Text)
+    hostname = db.Column(db.Text)
+    vendor = db.Column(db.Text)
 
-    devices = import_devices()
-    return {"devices": devices}
+
+db.create_all()
+
+from NetWatcher.controller.util import import_devices
+
+for device in import_devices():
+    device_object = Device(**device)
+    db.session.add(device_object)
+
+db.session.commit()
