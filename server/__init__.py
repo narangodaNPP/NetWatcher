@@ -2,7 +2,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-import NetWatcher.views.ui_views
+import server.views.ui_views
 from flask_sqlalchemy import SQLAlchemy
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/test.db"
@@ -23,7 +23,7 @@ class Device(db.Model):
 
 db.create_all()
 
-from NetWatcher.controller.util import import_devices
+from server.controller.util import import_devices
 
 for device in import_devices():
     device_object = Device(**device)
