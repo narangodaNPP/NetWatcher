@@ -13,3 +13,4 @@ __pycache__/
 /dataSources/
 /dataSources.local.xml
 
+node_modules
