@@ -22,7 +22,7 @@ class ApiModels:
                 "ip_address": fields.String(example="192.168.254.14"),
                 "mac_address": fields.String(example="00:27:02:15:5c:d5"),
                 "hostname": fields.String(example="RokuStreamingStick.home"),
-                "last_heard": fields.String(example="2021-04-19 14:42:15.185"),
+                "last_heard": fields.String(example="2024-02-14:42:15.185"),
                 "availability": fields.String(example="true"),
                 "response_time": fields.String(example="0.005"),
                 "open_tcp_ports": fields.String(example="[22, 80]")
@@ -46,9 +46,9 @@ class ApiModels:
         ApiModels.service_fields = api.model(
             "Service Fields",
             {
-                "name": fields.String(example="HTTP davidbombal"),
+                "name": fields.String(example="HTTP example"),
                 "type": fields.String(example="https"),
-                "target": fields.String(example="http://www.davidbombal.com"),
+                "target": fields.String(example="http://www.example.com"),
                 "data": fields.String(example=""),
                 "last_heard": fields.String(example="2021-04-19 14:43:46.102"),
                 "availability": fields.String(example="true"),

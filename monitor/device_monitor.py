@@ -16,11 +16,11 @@ DISCOVERY_INTERVAL = 300
 
 parser = argparse.ArgumentParser(description="Host Monitor")
 parser.add_argument('--poolsize', default=10, help='Size of the threadpool')
-parser.add_argument('--quokka', default="localhost:5001", help='Hostname/IP and port of the quokka server')
+parser.add_argument('--netwatcher', default="localhost:5001", help='Hostname/IP and port of the netwatcher server')
 
 args = parser.parse_args()
 threadpool_size = int(args.poolsize)
-quokka = args.quokka
+netwatcher = args.netwatcher
 
 
 def get_version(device, facts):
@@ -39,11 +39,11 @@ def get_version(device, facts):
 
 def get_devices():
 
-    global quokka
+    global netwatcher
 
     print("\n\n----> Retrieving devices ...", end="")
     try:
-        response = requests.get("http://"+quokka+"/devices")
+        response = requests.get("http://"+netwatcher+"/devices")
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to get devices via REST API: {e}")
         return {}
@@ -70,7 +70,8 @@ def discovery():
 
     for device in devices:
 
-        if device["name"] in existing_devices: continue
+        if device["name"] in existing_devices:
+            continue
 
         try:
             device["ip_address"] = socket.gethostbyname(device["hostname"])
@@ -89,11 +90,11 @@ def discovery():
 
 def update_device(device):
 
-    global quokka
+    global netwatcher
 
     print(f"----> Updating device status via REST API: {device['name']}", end="")
     try:
-        rsp = requests.put("http://"+quokka+"/devices", params={"name": device["name"]}, json=device)
+        rsp = requests.put("http://"+netwatcher+"/devices", params={"name": device["name"]}, json=device)
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to update device status via REST API: {device['name']}: {e}")
         return

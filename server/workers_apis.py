@@ -20,7 +20,7 @@ def start_portscan(target):
     print(f"starting portscan for target: {target}")
     token = str(datetime.now())
     portscan_info = {
-        "quokka": get_my_ip_address() + ":5001",
+        "netwatcher": get_my_ip_address() + ":5001",
         "work_type": "portscan",
         "target": target,
         "token": token,
@@ -36,7 +36,7 @@ def start_traceroute(target):
 
     token = str(datetime.now())
     traceroute_info = {
-        "quokka": get_my_ip_address() + ":5001",
+        "netwatcher": get_my_ip_address() + ":5001",
         "work_type": "traceroute",
         "target": target,
         "token": token,
@@ -51,7 +51,7 @@ def start_capture(ip, protocol, port, capture_time):
     print(f"starting capture for ip: {ip}, protocol: {protocol}, port: {port}, time: {capture_time}")
 
     capture_info = {
-        "quokka": get_my_ip_address() + ":5001",
+        "netwatcher": get_my_ip_address() + ":5001",
         "work_type": "capture",
         "ip": ip,
         "protocol": protocol,
@@ -62,33 +62,33 @@ def start_capture(ip, protocol, port, capture_time):
     send_worker_request("localhost", capture_info_json, key=ip)
 
 
-def start_snoop(ip, protocol, port, snoop_time):
-
-    print(f"starting snoop for ip: {ip}, protocol: {protocol}, port: {port}, time: {snoop_time}")
-
-    # First initiate packet capture for snooping
-    snoop_info = {
-        "quokka": get_my_ip_address() + ":5001",
-        "work_type": "snoop",
-        "ip": ip,
-        "protocol": protocol,
-        "port": port,
-        "capture_time": snoop_time,
-    }
-    snoop_info_json = json.dumps(snoop_info)
-    send_worker_request("localhost", snoop_info_json, key=ip)
-
-    # Now initiate portscan of IP address
-    token = str(datetime.now())
-    portscan_info = {
-        "quokka": get_my_ip_address() + ":5001",
-        "work_type": "portscan",
-        "target": ip,
-        "token": token,
-    }
-    portscan_info_json = json.dumps(portscan_info)
-    send_worker_request("localhost", portscan_info_json, key=ip)
-    return token
+# def start_snoop(ip, protocol, port, snoop_time):
+#
+#     print(f"starting snoop for ip: {ip}, protocol: {protocol}, port: {port}, time: {snoop_time}")
+#
+#     # First initiate packet capture for snooping
+#     snoop_info = {
+#         "netwatcher": get_my_ip_address() + ":5001",
+#         "work_type": "snoop",
+#         "ip": ip,
+#         "protocol": protocol,
+#         "port": port,
+#         "capture_time": snoop_time,
+#     }
+#     snoop_info_json = json.dumps(snoop_info)
+#     send_worker_request("localhost", snoop_info_json, key=ip)
+#
+#     # Now initiate portscan of IP address
+#     token = str(datetime.now())
+#     portscan_info = {
+#         "netwatcher": get_my_ip_address() + ":5001",
+#         "work_type": "portscan",
+#         "target": ip,
+#         "token": token,
+#     }
+#     portscan_info_json = json.dumps(portscan_info)
+#     send_worker_request("localhost", portscan_info_json, key=ip)
+#     return token
 
 
 def send_worker_request(broker, message, key):
@@ -125,4 +125,4 @@ def find_worker_name(key):
         print(f"looking for default key {DEFAULT_KEY} in workers {workers}")
         return workers[DEFAULT_KEY]["worker-name"]
     else:
-        return "quokka-worker"
+        return "worker"

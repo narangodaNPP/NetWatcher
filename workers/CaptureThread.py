@@ -1,4 +1,8 @@
-from scapy.all import sniff, hexdump, conf, get_if_list, get_if_addr
+from scapy.arch.linux import get_if_raw_addr
+from scapy.utils import hexdump
+from scapy.sendrecv import sniff
+import scapy.config
+import scapy.interfaces
 from threading import Thread
 from util import get_filter
 from scapy2dict import to_dict
@@ -32,14 +36,14 @@ class CaptureThread(Thread):
     @staticmethod
     def get_interface(ip):
 
-        route = conf.route.route(ip)
+        route = scapy.config.conf.route.route(ip)
         if route:
             return route[0]
 
         else:
-            if_list = get_if_list()
+            if_list = scapy.interfaces.get_if_list()
             for interface in if_list:
-                ip = get_if_addr(interface)
+                ip = get_if_raw_addr(interface)
                 if ip and ip != "127.0.0.1":
                     return interface
 
