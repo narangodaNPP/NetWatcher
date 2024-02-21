@@ -20,7 +20,7 @@ def start_receiving():
 
     print(f"Worker: starting rabbitmq, listening for work requests")
 
-    credentials = pika.PlainCredentials("quokkaUser", "quokkaPass")
+    credentials = pika.PlainCredentials("User", "Pass")
     connection = pika.BlockingConnection(pika.ConnectionParameters(broker, credentials=credentials))
     channel = connection.channel()
     worker_queue = worker_name
@@ -62,21 +62,21 @@ def receive_work_request(capture_channel, method, _, body):
 
 def process_work_request(work_type, work_info):
 
-    if "quokka" not in work_info:
-        print(f"!!! 'quokka' not present in work_info, cannot continue")
+    if "netwatcher" not in work_info:
+        print(f"!!! 'netwatcher' not present in work_info, cannot continue")
         return
     else:
-        quokka = work_info["quokka"]
-        print(f"---> work request received, will send results to {quokka}")
+        netwatcher = work_info["netwatcher"]
+        print(f"---> work request received, will send results to {netwatcher}")
 
     if work_type == CAPTURE:
-        work_thread = CaptureThread(quokka, work_info)
+        work_thread = CaptureThread(netwatcher, work_info)
     elif work_type == PORTSCAN:
-        work_thread = PortscanThread(quokka, work_info)
+        work_thread = PortscanThread(netwatcher, work_info)
     elif work_type == TRACEROUTE:
-        work_thread = TracerouteThread(quokka, work_info)
+        work_thread = TracerouteThread(netwatcher, work_info)
     elif work_type == SNOOP:
-        work_thread = CaptureThread(quokka, work_info, snoop=True)
+        work_thread = CaptureThread(netwatcher, work_info, snoop=True)
     else:
         print(f" !!! Invalid work_type: {work_type}, should have been caught earlier")
         return
@@ -89,12 +89,12 @@ if __name__ == "__main__":
     if os.geteuid() != 0:
         exit("You must have root privileges to run this script, try using 'sudo'.")
 
-    parser = argparse.ArgumentParser(description="Remote worker for quokka")
+    parser = argparse.ArgumentParser(description="Remote worker for NetWatcher")
     parser.add_argument(
         "-N",
         "--name",
-        default="quokka-worker",
-        help="Name of this worker; must match what is configured on quokka server",
+        default="worker",
+        help="Name of this worker; must match what is configured on server",
     )
     parser.add_argument(
         "-B",
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         "-H",
         "--heartbeat",
         default="30",
-        help="Frequency of heartbeats sent to quokka server, in seconds",
+        help="Frequency of heartbeats sent to server, in seconds",
     )
 
     args = parser.parse_args()

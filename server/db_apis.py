@@ -5,37 +5,33 @@ import time
 
 
 def remove_internals(d):
-
-    if d: return {k: v for (k, v) in d.items() if not k.startswith("_")}
-    else: return None
+    if d:
+        return {k: v for (k, v) in d.items() if not k.startswith("_")}
+    else:
+        return None
 
 
 def get_all_hosts():
-
     hosts = {host["hostname"]: remove_internals(host) for host in db.hosts.find().sort("hostname")}
     return hosts
 
 
 def get_host(hostname):
-
     host = db.hosts.find_one({"hostname": hostname})
     return remove_internals(host)
 
 
 def get_host_status(hostname, datapoints):
-
     status_records = db.hosts_status.find({"hostname": hostname}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def get_host_status_summary(hostname, datapoints):
-
     status_records = db.hosts_status_summary.find({"hostname": hostname}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def set_host(host):
-
     existing_host = db.hosts.find_one({"hostname": host["hostname"]})
     if not existing_host:
         db.hosts.insert_one(host)
@@ -52,19 +48,16 @@ def set_host(host):
 
 
 def get_all_services():
-
     services = {service["name"]: remove_internals(service) for service in db.services.find()}
     return services
 
 
 def get_service(name):
-
     service = db.services.find_one({"name": name})
     return remove_internals(service)
 
 
 def set_service(service):
-
     existing_service = db.services.find_one({"name": service["name"]})
     if not existing_service:
         db.services.insert_one(service)
@@ -81,43 +74,36 @@ def set_service(service):
 
 
 def get_service_status(name, datapoints):
-
     status_records = db.services_status.find({"name": name}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def get_service_status_summary(name, datapoints):
-
     status_records = db.services_status_summary.find({"name": name}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def get_all_devices():
-
     devices = {device["name"]: remove_internals(device) for device in db.devices.find()}
     return devices
 
 
 def get_device(name):
-
     device = db.devices.find_one({"name": name})
     return remove_internals(device)
 
 
 def get_device_status(name, datapoints):
-
     status_records = db.devices_status.find({"name": name}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def get_device_status_summary(name, datapoints):
-
     status_records = db.devices_status_summary.find({"name": name}).sort("time", -1).limit(datapoints)
     return [remove_internals(status_record) for status_record in status_records]
 
 
 def set_device(device):
-
     existing_device = db.devices.find_one({"name": device["name"]})
     if not existing_device:
         db.devices.insert_one(device)
@@ -134,17 +120,14 @@ def set_device(device):
 
 
 def record_portscan_data(portscan_data):
-
     db.portscans.insert_one(portscan_data)
 
 
 def record_traceroute_data(traceroute_data):
-
     db.traceroutes.insert_one(traceroute_data)
 
 
 def record_capture_data(capture_data):
-
     for captured_packet in capture_data["packets"]:
 
         packet = dict()
@@ -203,9 +186,7 @@ def record_capture_data(capture_data):
 
 
 def record_snoop_data(snoop_data):
-
     for captured_packet in snoop_data["packets"]:
-
         packet = dict()
         packet["timestamp"] = str(datetime.now())[:-3]
         packet["local_timestamp"] = snoop_data["timestamp"]
@@ -218,7 +199,6 @@ def record_snoop_data(snoop_data):
 
 
 def get_portscan(target, token):
-
     max_wait_time = 300  # extended port scan allowed to take 5 minutes max
     start_time = datetime.now()
     while (datetime.now() - start_time).total_seconds() < max_wait_time:
@@ -234,7 +214,6 @@ def get_portscan(target, token):
 
 
 def get_traceroute(target, token):
-
     max_wait_time = 300  # extended port scan allowed to take 5 minutes max
     start_time = datetime.now()
     while (datetime.now() - start_time).total_seconds() < max_wait_time:
@@ -250,13 +229,15 @@ def get_traceroute(target, token):
 
 
 def get_capture(ip, protocol, port, num_packets):
-
     print(f"---> getting capture: {ip}, {protocol}, {port}, type: {type(port)}")
 
     search_items = list()
-    if ip: search_items.append({"$or": [{"ip_src": ip}, {"ip_dst": ip}]})
-    if protocol: search_items.append({"protocol": protocol.upper()})
-    if port: search_items.append({"$or": [{"sport": port}, {"dport": port}]})
+    if ip:
+        search_items.append({"$or": [{"ip_src": ip}, {"ip_dst": ip}]})
+    if protocol:
+        search_items.append({"protocol": protocol.upper()})
+    if port:
+        search_items.append({"$or": [{"sport": port}, {"dport": port}]})
 
     search = {"$and": search_items} if search_items else {}
     packets_with_internals = db.captures.find(search).sort("timestamp", -1).limit(num_packets)
@@ -270,7 +251,6 @@ def get_capture(ip, protocol, port, num_packets):
 
 
 def trim_tables(status_expire_after, diagnostics_expire_after):
-
     for status_table in [db.hosts_status, db.services_status, db.devices_status]:
         status_table.delete_many({"time": {"$lt": str(status_expire_after)}})
 
@@ -279,7 +259,6 @@ def trim_tables(status_expire_after, diagnostics_expire_after):
 
 
 def create_summaries(hour):
-
     class StatusTableInfo:
         SEARCH_FIELD = "search_field"
         NAMES = "names"
@@ -314,9 +293,8 @@ def create_summaries(hour):
 
 
 def generate_status_data_for_hour(status_table, names, search_field, status_summary_table, hour):
-
     for name in names:
-        status_items_for_hour = status_table.find({search_field: name, "time": {'$regex': '^'+hour}})
+        status_items_for_hour = status_table.find({search_field: name, "time": {'$regex': '^' + hour}})
 
         hourly_summary = dict()
         hourly_summary[search_field] = name

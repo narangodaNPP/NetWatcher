@@ -11,20 +11,20 @@ DISCOVERY_INTERVAL = 300
 
 parser = argparse.ArgumentParser(description="Host Monitor")
 parser.add_argument('--poolsize', default=10, help='Size of the threadpool')
-parser.add_argument('--quokka', default="localhost:5001", help='Hostname/IP and port of the quokka server')
+parser.add_argument('--netwatcher', default="localhost:5001", help='Hostname/IP and port of the netwatcher server')
 
 args = parser.parse_args()
 threadpool_size = int(args.poolsize)
-quokka = args.quokka
+netwatcher = args.netwatcher
 
 
 def get_services():
 
-    global quokka
+    global netwatcher
 
     print("\n\n----> Retrieving services ...", end="")
     try:
-        response = requests.get("http://"+quokka+"/services")
+        response = requests.get("http://"+netwatcher+"/services")
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to get services via REST API: {e}")
         return {}
@@ -65,11 +65,11 @@ def discovery():
 
 def update_service(service):
 
-    global quokka
+    global netwatcher
 
     print(f"----> Updating service status via REST API: {service['name']}", end="")
     try:
-        rsp = requests.put("http://"+quokka+"/services", params={"name": service["name"]}, json=service)
+        rsp = requests.put("http://"+netwatcher+"/services", params={"name": service["name"]}, json=service)
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to update service status via REST API: {service['name']}: {e}")
         return

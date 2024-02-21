@@ -23,9 +23,10 @@ from db_apis import get_all_services, set_service, get_service, get_service_stat
 from db_apis import get_capture, get_portscan, get_traceroute
 
 from db_apis import record_portscan_data, record_traceroute_data, record_capture_data, record_snoop_data
-from workers_apis import start_portscan, start_traceroute, start_capture, start_snoop
 
-limiter = Limiter(NetWatcher)
+# from workers_apis import start_portscan, start_traceroute, start_capture, start_snoop
+
+limiter = Limiter(get_remote_address, app=NetWatcher, )
 
 # Start background DB hourly task
 db_hourly_task = DbHourlyTask()
@@ -35,7 +36,6 @@ db_hourly_task_thread.start()
 
 # shutdown of our flask process requires terminating background db thread
 def shutdown():
-
     db_hourly_task.set_terminate()
     db_hourly_task_thread.join()
 
@@ -45,7 +45,6 @@ atexit.register(shutdown)  # causes shutdown() to get called when exiting
 
 @api.route("/hosts")
 class HostsEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -69,7 +68,6 @@ class HostsEndpoint(Resource):
 
 @api.route("/devices")
 class DevicesEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -93,7 +91,6 @@ class DevicesEndpoint(Resource):
 
 @api.route("/services")
 class ServicesEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -117,7 +114,6 @@ class ServicesEndpoint(Resource):
 
 @api.route("/scan")
 class ScanEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -149,7 +145,6 @@ class ScanEndpoint(Resource):
 
 @api.route("/worker/portscan")
 class WorkerScanEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -164,7 +159,6 @@ class WorkerScanEndpoint(Resource):
 
 @api.route("/traceroute")
 class TracerouteEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -200,7 +194,6 @@ class TracerouteEndpoint(Resource):
 
 @api.route("/worker/traceroute")
 class WorkerTracerouteEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -215,7 +208,6 @@ class WorkerTracerouteEndpoint(Resource):
 
 @api.route("/capture")
 class CaptureEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -234,8 +226,10 @@ class CaptureEndpoint(Resource):
         if ip: ip = get_ip_address_from_target(ip)
 
         if not num_packets or not num_packets.isnumeric(): num_packets = 10
-        if port and port.isnumeric(): port = int(port)
-        else: port = None
+        if port and port.isnumeric():
+            port = int(port)
+        else:
+            port = None
 
         return {"packets": get_capture(ip, protocol, port, int(num_packets))}
 
@@ -254,8 +248,10 @@ class CaptureEndpoint(Resource):
 
         if ip: ip = get_ip_address_from_target(ip)
 
-        if not capture_time: capture_time = 180
-        else:  capture_time = int(capture_time)
+        if not capture_time:
+            capture_time = 180
+        else:
+            capture_time = int(capture_time)
 
         start_capture(ip, protocol, port, capture_time)
         return "Capture initiated", 200
@@ -326,7 +322,6 @@ class WorkerCaptureEndpoint(Resource):
 
 @api.route("/host/status")
 class HostStatusEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -357,7 +352,6 @@ class HostStatusEndpoint(Resource):
 
 @api.route("/service/status")
 class ServiceStatusEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod
@@ -388,7 +382,6 @@ class ServiceStatusEndpoint(Resource):
 
 @api.route("/device/status")
 class DeviceStatusEndpoint(Resource):
-
     decorators = [limiter.limit("120/minute")]
 
     @staticmethod

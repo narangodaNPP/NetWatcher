@@ -5,28 +5,30 @@ from datetime import datetime, timedelta
 from time import sleep
 import socket
 import requests
-import scapy.all as scapy
+import scapy
 from concurrent.futures import ThreadPoolExecutor
+
+import scapy.layers.l2
 
 MONITOR_INTERVAL = 60
 DISCOVERY_INTERVAL = 300
 
 parser = argparse.ArgumentParser(description="Host Monitor")
 parser.add_argument('--poolsize', default=10, help='Size of the threadpool')
-parser.add_argument('--quokka', default="localhost:5001", help='Hostname/IP and port of the quokka server')
+parser.add_argument('--netwatcher', default="localhost:5001", help='Hostname/IP and port of the netwatcher server')
 
 args = parser.parse_args()
 threadpool_size = int(args.poolsize)
-quokka = args.quokka
+netwatcher = args.netwatcher
 
 
 def get_hosts():
 
-    global quokka
+    global netwatcher
 
     print("\n\n----> Retrieving hosts ...", end="")
     try:
-        response = requests.get("http://"+quokka+"/hosts")
+        response = requests.get("http://"+netwatcher+"/hosts")
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to get hosts via REST API: {e}")
         return {}
@@ -45,7 +47,7 @@ def discovery():
     print(
         "\n\n----- Discovery hosts on network using arping() function ---------------------"
     )
-    ans, unans = scapy.arping("10.0.0.0/24")
+    ans, unans = (scapy.layers.l2.arping('192.168.8.0/24'))
     ans.summary()
 
     for res in ans.res:
@@ -82,11 +84,11 @@ def discovery():
 
 def update_host(host):
 
-    global quokka
+    global netwatcher
 
     print(f"----> Updating host status via REST API: {host['hostname']}", end="")
     try:
-        rsp = requests.put("http://"+quokka+"/hosts", params={"hostname": host["hostname"]}, json=host)
+        rsp = requests.put("http://"+netwatcher+"/hosts", params={"hostname": host["hostname"]}, json=host)
     except requests.exceptions.ConnectionError as e:
         print(f" !!!  Exception trying to update host {host['hostname']} via REST API: {e}")
         return
